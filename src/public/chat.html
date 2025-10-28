@@ -1,1 +1,45 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"/><title>Chat</title><link rel="stylesheet" href="/styles.css"></head>
+<body>
+  <h1>Chat</h1>
+  <div id="chatArea">
+    <ul id="messages"></ul>
+  </div>
+  <form id="msgForm">
+    <input id="msgInput" autocomplete="off" placeholder="Escribe..." />
+    <button>Enviar</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Debes iniciar sesión para acceder al chat');
+      window.location = '/login.html';
+    }
+
+    const socket = io({ auth: { token } });
+
+    socket.on('connect_error', (err) => {
+      alert('Error de conexión: ' + err.message);
+      console.error(err);
+    });
+
+    socket.on('message', (m) => {
+      const li = document.createElement('li');
+      li.textContent = `${m.user.username}: ${m.text} (${new Date(m.createdAt).toLocaleTimeString()})`;
+      document.getElementById('messages').appendChild(li);
+    });
+
+    document.getElementById('msgForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = document.getElementById('msgInput').value.trim();
+      if (!text) return;
+      socket.emit('message', { text });
+      document.getElementById('msgInput').value = '';
+    });
+  </script>
+</body>
+</html>
 
