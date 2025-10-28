@@ -1,1 +1,39 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"/><title>Registro</title><link rel="stylesheet" href="/styles.css"></head>
+<body>
+  <h1>Registro</h1>
+  <form id="registerForm">
+    <input name="username" placeholder="Usuario" required />
+    <input name="email" type="email" placeholder="Email" required/>
+    <input name="password" type="password" placeholder="Contraseña" required/>
+    <select name="role">
+      <option value="user">Usuario</option>
+      <option value="admin">Administrador</option>
+    </select>
+    <button type="submit">Registrar</button>
+  </form>
+  <p>¿Ya tienes cuenta? <a href="/login.html">Login</a></p>
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const body = { username: fd.get('username'), email: fd.get('email'), password: fd.get('password'), role: fd.get('role') };
+  const res = await fetch('/api/auth/register', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (res.ok) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    window.location = '/';
+  } else {
+    alert(data.message || 'Error');
+  }
+});
+</script>
+</body>
+</html>
 
