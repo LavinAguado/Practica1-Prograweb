@@ -1,1 +1,5 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+header { margin-bottom: 20px; }
+#products li { margin: 10px 0; padding: 8px; border: 1px solid #ddd; }
+button { cursor: pointer; }
 
