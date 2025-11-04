@@ -42,7 +42,7 @@ io.use(async (socket, next) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('Usuario conectado:', socket.user?.username);
+  console.log('Usuario conectado:', socket.user && socket.user.username);
 
   // Emitir historial simple (no persistente) si lo guardas en memoria (aquí no)
   socket.on('message', (payload) => {
