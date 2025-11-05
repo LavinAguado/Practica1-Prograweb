@@ -1,45 +1,34 @@
-<!doctype html>
-<html>
-<head><meta charset="utf-8"/><title>Chat</title><link rel="stylesheet" href="/styles.css"></head>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
 <body>
-  <h1>Chat</h1>
-  <div id="chatArea">
-    <ul id="messages"></ul>
+  <!-- Barra superior -->
+  <div class="chat-header">
+    <button id="backToProducts" class="back-btn">🛍️ Volver al portal</button>
   </div>
-  <form id="msgForm">
-    <input id="msgInput" autocomplete="off" placeholder="Escribe..." />
-    <button>Enviar</button>
-  </form>
+
+  <!-- Contenedor principal del chat -->
+  <div class="chat-container">
+    <h1>💬 Chat en tiempo real</h1>
+
+    <!-- RECUADRO DE MENSAJES -->
+    <div id="messages" class="messages"></div>
+
+    <!-- Formulario -->
+    <form id="chatForm" class="chat-form">
+      <input id="msgInput" type="text" placeholder="Escribe un mensaje..." required />
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Debes iniciar sesión para acceder al chat');
-      window.location = '/login.html';
-    }
-
-    const socket = io({ auth: { token } });
-
-    socket.on('connect_error', (err) => {
-      alert('Error de conexión: ' + err.message);
-      console.error(err);
-    });
-
-    socket.on('message', (m) => {
-      const li = document.createElement('li');
-      li.textContent = `${m.user.username}: ${m.text} (${new Date(m.createdAt).toLocaleTimeString()})`;
-      document.getElementById('messages').appendChild(li);
-    });
-
-    document.getElementById('msgForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const text = document.getElementById('msgInput').value.trim();
-      if (!text) return;
-      socket.emit('message', { text });
-      document.getElementById('msgInput').value = '';
-    });
-  </script>
+  <script src="/chat.js"></script>
 </body>
 </html>
+
 

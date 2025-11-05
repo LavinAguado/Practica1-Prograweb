@@ -1,42 +1,46 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Portal de Productos</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <header>
-    <h1>Portal de Productos</h1>
+  <div class="container">
+    <header>
+  <h1>🛍️ Portal de Productos</h1>
+  <p id="userInfo">Cargando usuario...</p>
+  <div id="authButtons">
+    <a href="/login.html" class="btn">Iniciar sesión</a>
+    <a href="/register.html" class="btn secondary">Registrarse</a>
+  </div>
+</header>
+
     <nav>
-      <a href="/login.html">Login</a> |
-      <a href="/register.html">Registro</a> |
-      <a href="/chat.html" id="chatLink">Chat</a> |
+      <a id="chatLink" href="/chat.html" style="display:none;">💬 Ir al Chat</a>
       <button id="logoutBtn" style="display:none;">Cerrar sesión</button>
     </nav>
-  </header>
-
-  <main>
-    <section id="userInfo"></section>
 
     <section id="createProduct" style="display:none;">
-      <h2>Crear producto (admin)</h2>
+      <h2>➕ Crear nuevo producto</h2>
       <form id="createForm">
-        <input placeholder="Título" name="title" required/>
-        <input placeholder="Precio" name="price" type="number" required/>
-        <input placeholder="Imagen (URL)" name="image"/>
-        <textarea placeholder="Descripción" name="description"></textarea>
-        <button type="submit">Crear</button>
+        <input type="text" name="title" placeholder="Título" required />
+        <input type="number" step="0.01" name="price" placeholder="Precio (€)" required />
+        <input type="text" name="image" placeholder="URL de imagen (opcional)" />
+        <textarea name="description" placeholder="Descripción"></textarea>
+        <button type="submit">Crear producto</button>
       </form>
     </section>
 
     <section>
-      <h2>Productos</h2>
+      <h2>🧾 Lista de productos</h2>
       <ul id="products"></ul>
     </section>
-  </main>
+  </div>
 
-<script src="/client.js"></script>
+  <script src="/client.js"></script>
 </body>
 </html>
+
 

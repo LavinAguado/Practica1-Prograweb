@@ -42,17 +42,20 @@ io.use(async (socket, next) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('Usuario conectado:', socket.user && socket.user.username);
+  console.log('Usuario conectado');
 
-  // Emitir historial simple (no persistente) si lo guardas en memoria (aquí no)
-  socket.on('message', (payload) => {
-    // payload: { text }
-    const message = {
-      user: { username: socket.user.username, id: socket.user.id },
-      text: payload.text,
-      createdAt: new Date()
-    };
-    io.emit('message', message);
+  // Avisar a todos los clientes que alguien se conectó
+  socket.broadcast.emit('userConnected', socket.user?.username || 'Un usuario');
+
+  // Escuchar mensajes del cliente
+  socket.on('chatMessage', (data) => {
+    console.log('Mensaje recibido:', data);
+    io.emit('chatMessage', data); // <--- esto reenvía el mensaje a TODOS los clientes
+  });
+
+  // Avisar cuando un usuario se desconecta
+  socket.on('disconnect', () => {
+    io.emit('userDisconnected', socket.user?.username || 'Un usuario');
   });
 
   socket.on('disconnect', () => {

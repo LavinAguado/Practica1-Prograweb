@@ -17,9 +17,9 @@
     "socket.io": "^4.7.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "tailwindcss": "^4.1.16"
   },
   "author": "",
   "license": "MIT"
 }
-
