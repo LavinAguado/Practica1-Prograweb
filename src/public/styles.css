@@ -327,3 +327,47 @@ nav a:hover {
 .chat-form button:hover {
   background: #0056d6;
 }
+.message {
+  margin: 6px 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.message.self {
+  background-color: #dcf8c6; /* verde claro tipo WhatsApp */
+  align-self: flex-end;
+}
+
+.message.other {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  align-self: flex-start;
+}
+
+.msg-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8em;
+  color: #555;
+  margin-bottom: 2px;
+}
+
+.msg-body {
+  font-size: 1em;
+  color: #222;
+}
+
+.time {
+  font-size: 0.75em;
+  color: #777;
+  margin-left: 8px;
+}
+#messages {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: 400px;
+  padding: 10px;
+}

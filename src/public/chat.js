@@ -25,9 +25,11 @@ chatForm.addEventListener('submit', (e) => {
   const message = msgInput.value.trim();
   if (message) {
     socket.emit('chatMessage', {
-      username: user.username,
-      message
-    });
+     username: user.username,
+      message,
+      time: new Date().toISOString()
+   });
+
     msgInput.value = '';
   }
 });
@@ -37,17 +39,30 @@ socket.on('chatMessage', (data) => {
   const msgEl = document.createElement('div');
   msgEl.classList.add('message');
 
-  // si el mensaje es del propio usuario → azul (self)
+  // Diferenciar mensajes propios y ajenos
   if (data.username === user.username) {
     msgEl.classList.add('self');
   } else {
     msgEl.classList.add('other');
   }
 
-  msgEl.innerHTML = `<strong>${data.username}:</strong> ${data.message}`;
+  // 🕒 Formatear hora tipo "HH:MM"
+  const date = new Date(data.time || Date.now());
+  const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  // 💬 Estructura del mensaje con hora
+  msgEl.innerHTML = `
+    <div class="msg-header">
+      <strong>${data.username}</strong>
+      <span class="time">${timeStr}</span>
+    </div>
+    <div class="msg-body">${data.message}</div>
+  `;
+
   messagesDiv.appendChild(msgEl);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
+
 
 
 // Mostrar aviso cuando un usuario se conecta
