@@ -4,6 +4,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const { Server: IOServer } = require('socket.io');
 const path = require('path');
+const { authenticateJWT } = require('./src/middleware/authenticateJWT');
+
 
 const config = require('./config');
 const authRoutes = require('./src/routes/authRoutes');
@@ -26,6 +28,11 @@ app.use(express.static(path.join(__dirname, 'src', 'public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/chat', chatRoutes);
+// Ruta protegida para acceder al chat
+app.get('/chat.html', authenticateJWT, (req, res) => {
+  res.sendFile(path.join(__dirname, 'src', 'public', 'chat.html'));
+});
+
 
 // MongoDB
 mongoose.connect(config.mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
