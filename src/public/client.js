@@ -53,10 +53,45 @@ async function fetchProducts() {
           <p class="text-gray-700">Stock: ${p.stock}</p>
           </div>
       `;
-       const buyBtn = document.createElement('button');
-       buyBtn.textContent = 'Añadir al carrito';
-       buyBtn.onclick = () => addToCart(p);
-       li.appendChild(buyBtn);
+       let selectedQty = 1;
+
+       const controls = document.createElement('div');
+       controls.style.display = 'flex';
+       controls.style.alignItems = 'center';
+       controls.style.gap = '6px';
+
+       const minusBtn = document.createElement('button');
+       minusBtn.textContent = '−';
+       minusBtn.onclick = () => {
+       if (selectedQty > 1) {
+       selectedQty--;
+       qtySpan.textContent = selectedQty;
+  }
+};
+
+const qtySpan = document.createElement('span');
+qtySpan.textContent = selectedQty;
+
+const plusBtn = document.createElement('button');
+plusBtn.textContent = '+';
+plusBtn.onclick = () => {
+  if (selectedQty < p.stock) {
+    selectedQty++;
+    qtySpan.textContent = selectedQty;
+  }
+};
+
+const buyBtn = document.createElement('button');
+buyBtn.textContent = 'Añadir';
+buyBtn.onclick = () => addToCart(p, selectedQty);
+
+controls.appendChild(minusBtn);
+controls.appendChild(qtySpan);
+controls.appendChild(plusBtn);
+controls.appendChild(buyBtn);
+
+li.appendChild(controls);
+
 
       if (user && user.role === 'admin') {
         const buttons = document.createElement('div');
@@ -165,22 +200,23 @@ async function buyProduct(productId) {
   }
 }
 
-function addToCart(product) {
+function addToCart(product, quantity = 1) {
   const existing = cart.find(i => i.productId === product._id);
 
   if (existing) {
-    existing.quantity += 1;
+    existing.quantity += quantity;
   } else {
     cart.push({
       productId: product._id,
       title: product.title,
       price: product.price,
-      quantity: 1
+      quantity
     });
   }
 
   renderCart();
 }
+
 function removeFromCart(productId) {
   const item = cart.find(i => i.productId === productId);
   if (!item) return;
@@ -194,25 +230,11 @@ function removeFromCart(productId) {
   renderCart();
 }
 
-function renderCart() {
-  const ul = document.getElementById('cart');
-  ul.innerHTML = '';
 
-  cart.forEach(item => {
-    const li = document.createElement('li');
-
-    const text = document.createElement('span');
-    text.textContent = `${item.title} x ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} €`;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.textContent = '❌';
-    removeBtn.style.marginLeft = '10px';
-    removeBtn.onclick = () => removeFromCart(item.productId);
-
-    li.appendChild(text);
-    li.appendChild(removeBtn);
-    ul.appendChild(li);
-  });
+function calculateTotal() {
+  return cart.reduce((sum, item) => {
+    return sum + item.price * item.quantity;
+  }, 0);
 }
 
 document.getElementById('checkoutBtn').onclick = async () => {
@@ -255,6 +277,71 @@ document.getElementById('checkoutBtn').onclick = async () => {
     fetchProducts(); // refrescar stock
   }
 };
+function increaseQuantity(productId) {
+  const item = cart.find(i => i.productId === productId);
+  if (item) {
+    item.quantity++;
+    renderCart();
+  }
+}
+
+function decreaseQuantity(productId) {
+  const item = cart.find(i => i.productId === productId);
+  if (!item) return;
+
+  item.quantity--;
+
+  if (item.quantity <= 0) {
+    removeFromCart(productId);
+  } else {
+    renderCart();
+  }
+}
+function renderCart() {
+  const ul = document.getElementById('cart');
+  ul.innerHTML = '';
+
+  let total = 0;
+
+  cart.forEach(item => {
+    const li = document.createElement('li');
+
+    const name = document.createElement('span');
+    name.textContent = item.title;
+
+    const minusBtn = document.createElement('button');
+    minusBtn.textContent = '−';
+    minusBtn.onclick = () => decreaseQuantity(item.productId);
+
+    const qty = document.createElement('span');
+    qty.textContent = ` ${item.quantity} `;
+    qty.style.margin = '0 6px';
+
+    const plusBtn = document.createElement('button');
+    plusBtn.textContent = '+';
+    plusBtn.onclick = () => increaseQuantity(item.productId);
+
+    const price = document.createElement('span');
+    const subtotal = item.price * item.quantity;
+    price.textContent = ` = ${subtotal.toFixed(2)} €`;
+    price.style.marginLeft = '10px';
+
+    li.appendChild(name);
+    li.appendChild(minusBtn);
+    li.appendChild(qty);
+    li.appendChild(plusBtn);
+    li.appendChild(price);
+
+    ul.appendChild(li);
+
+    total += subtotal;
+  });
+
+  document.getElementById('cartTotal').textContent =
+    `Total: ${total.toFixed(2)} €`;
+}
+
+
 
 
 
