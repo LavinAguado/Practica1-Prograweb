@@ -16,14 +16,23 @@ router.get('/', authenticateJWT, async (req, res) => {
 // Create (admin only)
 router.post('/', authenticateJWT, authorizeRoles('admin'), async (req, res) => {
   try {
-    const { title, description, price, image } = req.body;
-    const p = new Product({ title, description, price, image });
+    const { title, description, price, image, stock } = req.body;
+
+    const p = new Product({
+      title,
+      description,
+      price,
+      image,
+      stock
+    });
+
     await p.save();
     res.status(201).json(p);
   } catch (err) {
     res.status(500).json({ message: 'Error creando producto' });
   }
 });
+
 
 // Get details
 router.get('/:id', authenticateJWT, async (req, res) => {
@@ -37,11 +46,25 @@ router.get('/:id', authenticateJWT, async (req, res) => {
 });
 
 // Update (admin only)
+// Update product (admin only)
 router.put('/:id', authenticateJWT, authorizeRoles('admin'), async (req, res) => {
   try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ message: 'Producto no encontrado' });
-    res.json(updated);
+    const { title, description, price, image, stock } = req.body;
+
+    const p = await Product.findById(req.params.id);
+    if (!p) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+
+    // Actualizamos campos
+    if (title !== undefined) p.title = title;
+    if (description !== undefined) p.description = description;
+    if (price !== undefined) p.price = price;
+    if (image !== undefined) p.image = image;
+    if (stock !== undefined) p.stock = stock;
+
+    await p.save();
+    res.json(p);
   } catch (err) {
     res.status(500).json({ message: 'Error actualizando producto' });
   }

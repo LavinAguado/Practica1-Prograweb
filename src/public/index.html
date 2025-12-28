@@ -27,6 +27,7 @@
       <form id="createForm">
         <input type="text" name="title" placeholder="Título" required />
         <input type="number" step="0.01" name="price" placeholder="Precio (€)" required />
+        <input type="number" name="stock" placeholder="Stock" required />
         <input type="text" name="image" placeholder="URL de imagen (opcional)" />
         <textarea name="description" placeholder="Descripción"></textarea>
         <button type="submit">Crear producto</button>
@@ -37,6 +38,12 @@
       <h2>🧾 Lista de productos</h2>
       <ul id="products"></ul>
     </section>
+    <section>
+       <h2>🛒 Carrito</h2>
+       <ul id="cart"></ul>
+       <button id="checkoutBtn">Finalizar compra</button>
+     </section>
+
   </div>
 
   <script src="/client.js"></script>

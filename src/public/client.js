@@ -5,6 +5,7 @@ const user = JSON.parse(localStorage.getItem('user') || 'null');
 const userInfoEl = document.getElementById('userInfo');
 const logoutBtn = document.getElementById('logoutBtn');
 const chatLink = document.getElementById('chatLink');
+let cart = [];
 
 function showUser() {
   const authButtons = document.getElementById('authButtons');
@@ -49,8 +50,14 @@ async function fetchProducts() {
           <h3 class="text-lg font-semibold text-gray-800">${p.title}</h3>
           <p class="text-gray-600">${p.description || ''}</p>
           <p class="text-blue-600 font-medium">${parseFloat(p.price).toFixed(2)} €</p>
-        </div>
+          <p class="text-gray-700">Stock: ${p.stock}</p>
+          </div>
       `;
+       const buyBtn = document.createElement('button');
+       buyBtn.textContent = 'Añadir al carrito';
+       buyBtn.onclick = () => addToCart(p);
+       li.appendChild(buyBtn);
+
       if (user && user.role === 'admin') {
         const buttons = document.createElement('div');
         buttons.className = "flex gap-2 mt-2";
@@ -85,17 +92,24 @@ async function deleteProduct(id) {
 function editProduct(p) {
   const title = prompt('Título', p.title);
   if (title === null) return;
+
   const price = parseFloat(prompt('Precio', p.price));
   const description = prompt('Descripción', p.description || '');
+  const stock = parseInt(prompt('Stock', p.stock));
+
   fetch('/api/products/' + p._id, {
     method: 'PUT',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, price, description })
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ title, price, description, stock })
   }).then(res => {
     if (res.ok) fetchProducts();
     else res.json().then(r => alert(r.message || 'Error'));
   });
 }
+
 
 document.getElementById('createForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -103,6 +117,7 @@ document.getElementById('createForm').addEventListener('submit', async (e) => {
   const body = {
     title: fd.get('title'),
     price: parseFloat(fd.get('price')),
+    stock: parseInt(fd.get('stock')),
     image: fd.get('image'),
     description: fd.get('description')
   };
@@ -119,6 +134,130 @@ document.getElementById('createForm').addEventListener('submit', async (e) => {
     alert(r.message || 'Error creando');
   }
 });
+async function buyProduct(productId) {
+  const query = `
+    mutation {
+      createOrder(
+        items: [{ productId: "${productId}", quantity: 1 }]
+      ) {
+        id
+        total
+        status
+      }
+    }
+  `;
+
+  const res = await fetch('/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ query })
+  });
+
+  const data = await res.json();
+
+  if (data.errors) {
+    alert(data.errors[0].message);
+  } else {
+    alert('Pedido creado correctamente');
+    fetchProducts(); // refresca stock
+  }
+}
+
+function addToCart(product) {
+  const existing = cart.find(i => i.productId === product._id);
+
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({
+      productId: product._id,
+      title: product.title,
+      price: product.price,
+      quantity: 1
+    });
+  }
+
+  renderCart();
+}
+function removeFromCart(productId) {
+  const item = cart.find(i => i.productId === productId);
+  if (!item) return;
+
+  item.quantity -= 1;
+
+  if (item.quantity <= 0) {
+    cart = cart.filter(i => i.productId !== productId);
+  }
+
+  renderCart();
+}
+
+function renderCart() {
+  const ul = document.getElementById('cart');
+  ul.innerHTML = '';
+
+  cart.forEach(item => {
+    const li = document.createElement('li');
+
+    const text = document.createElement('span');
+    text.textContent = `${item.title} x ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} €`;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = '❌';
+    removeBtn.style.marginLeft = '10px';
+    removeBtn.onclick = () => removeFromCart(item.productId);
+
+    li.appendChild(text);
+    li.appendChild(removeBtn);
+    ul.appendChild(li);
+  });
+}
+
+document.getElementById('checkoutBtn').onclick = async () => {
+  if (cart.length === 0) {
+    alert('El carrito está vacío');
+    return;
+  }
+
+  const items = cart.map(i => ({
+    productId: i.productId,
+    quantity: i.quantity
+  }));
+
+  const query = `
+    mutation {
+      createOrder(
+        items: ${JSON.stringify(items).replace(/"([^"]+)":/g, '$1:')}
+      ) {
+        id
+        total
+        status
+      }
+    }
+  `;
+
+  const res = await fetch('/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query })
+  });
+
+  const data = await res.json();
+
+  if (data.errors) {
+    alert(data.errors[0].message);
+  } else {
+    alert('Pedido realizado correctamente');
+    cart = [];
+    renderCart();
+    fetchProducts(); // refrescar stock
+  }
+};
+
+
+
 
 // initial load
 fetchProducts();

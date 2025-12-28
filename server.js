@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -5,7 +7,7 @@ const mongoose = require('mongoose');
 const { Server: IOServer } = require('socket.io');
 const path = require('path');
 const { authenticateJWT } = require('./src/middleware/authenticateJWT');
-
+const startApolloServer = require('./src/graphql');
 
 const config = require('./config');
 const authRoutes = require('./src/routes/authRoutes');
@@ -72,6 +74,8 @@ io.on('connection', (socket) => {
 
 // Attach io to app for routes that need it (no obligatorio)
 app.set('io', io);
+startApolloServer(app);
+
 
 server.listen(config.port, () => {
   console.log(`Servidor iniciado en puerto ${config.port}`);
